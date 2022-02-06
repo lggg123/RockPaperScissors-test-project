@@ -72,19 +72,6 @@ contract RockPaperScissors {
         }
     }
 
-
-    // function withdraw() external payable {
-    //     uint playerBalance = playerBalanaces[msg.sender];
-    //     require(playerBalance > 0);
-        
-    //     playerBalances[msg.sender] = 0;
-    //     (bool success, ) = address(msg.sender).call{ value: playerBalance }("");
-    //     require(success, "withdraw failed to send");
-    // }
-
-    // Save players move and return 'true' if move is 
-    // valid, 'false' otherwise.
-
     function encryptMove(string memory clearMove, uint256 pirvateKy) public pure returns(bytes32){
         return sha256(abi.encodePacked(clearMove));
     }
@@ -103,9 +90,7 @@ contract RockPaperScissors {
         require(encryptmoveBob != 0x0 && encryptmoveAlice != 0x0);
         _;
     }
-
-    // Compare move with the saved move
-    // Return clear with success, 'Moves.None' otherwise.
+    
     function reveal(string memory clearMove) public commitPhaseEnded returns (Moves) {
         bytes32 Move = encryptMove(clearMove, 0);
         // Moves move = Moves(getFirstChar(clearMove)); // Actual move (Rock/Paper/Scissors)

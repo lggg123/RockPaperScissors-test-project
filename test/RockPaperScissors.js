@@ -51,21 +51,6 @@ describe("RockPaperScissors", async function () {
     })
 
     it("win conditions", async function() {
-        /*
-
-        const sum = [1,2,3,4,5,6].reduce((previousValue, currentValue)=>{
-            return previousValue + currentValue;
-        }, 0);
-        const resolvedSum = await [1,2,3,4,5,6].reduce(async (previousPromise, currentValue)=>{
-            const previousValue = await previousPromise
-            return previousValue + currentValue;
-        }, Promise.resolve(0));
-        P.then(()=>{
-            return P2
-        }).then(()=>{
-            return P3
-        })
-        */
 
         const moves = await rpsContract.getMoveKeys();
         return moves.reduce(async (previousPromise, losingMove, index)=>{
@@ -165,21 +150,6 @@ describe("RockPaperScissors", async function () {
     })
 
     it("tie conditions", async function() {
-        /*
-
-        const sum = [1,2,3,4,5,6].reduce((previousValue, currentValue)=>{
-            return previousValue + currentValue;
-        }, 0);
-        const resolvedSum = await [1,2,3,4,5,6].reduce(async (previousPromise, currentValue)=>{
-            const previousValue = await previousPromise
-            return previousValue + currentValue;
-        }, Promise.resolve(0));
-        P.then(()=>{
-            return P2
-        }).then(()=>{
-            return P3
-        })
-        */
 
         const moves = await rpsContract.getMoveKeys();
         return moves.reduce(async (previousPromise, move, index)=>{
