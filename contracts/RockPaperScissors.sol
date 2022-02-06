@@ -14,6 +14,9 @@ contract RockPaperScissors {
     uint private REVEAL_TIMEOUT = 60 * 60 * 1000;
 
     enum Moves {None, Rock, Paper, Scissors}
+
+    event ThingHappened(string _e);
+
     enum Outcomes {None, Bob, Alice, Draw}
 
     // Players Bob and Alice
@@ -31,9 +34,11 @@ contract RockPaperScissors {
     // Clear moves set only after both players have committed their encrypted moves
     Moves private moveBob;
     Moves private moveAlice;
+    bool private bobPayed;
+    bool private alicePayed;
 
     constructor(uint _initialBet) {
-        require(_initialBet >= BET_MIN);
+        require(_initialBet >= BET_MIN, "Initial bet too small");
         initialBet = _initialBet;
     }
 
@@ -43,9 +48,30 @@ contract RockPaperScissors {
         _;
     }
 
-    // function deposit() external payable{
-    //     playerBalances[msg.sender] += msg.value;
-    // }
+    function reserveSpot() public{
+        if(Bob == EMPTY_ADDRESS){
+            Bob = payable(msg.sender);
+        } else if(Alice == EMPTY_ADDRESS && msg.sender != Bob){
+            Alice = payable(msg.sender);
+        } else {
+            require(false, "This contract has been taken");
+        }
+    }
+
+
+    function deposit() external payable{
+        require(msg.value == initialBet, "Provided value not equal to the initial Bet");
+        if(msg.sender == Bob){
+            require(!bobPayed, "Bob already paid");
+            bobPayed = true;
+        } else if(msg.sender == Alice){
+            require(!alicePayed, "Alice already paid");
+            alicePayed = true;
+        } else {
+            require(false, "invalid user"); // Nobody should pay but bob and alice
+        }
+    }
+
 
     // function withdraw() external payable {
     //     uint playerBalance = playerBalanaces[msg.sender];
@@ -59,10 +85,10 @@ contract RockPaperScissors {
     // Save players move and return 'true' if move is 
     // valid, 'false' otherwise.
 
-    function encrypt() public {
-
+    function encryptMove(string memory clearMove, uint256 pirvateKy) public pure returns(bytes32){
+        return sha256(abi.encodePacked(clearMove));
     }
-    function play(bytes32 Move) public returns (bool) {
+    function play(bytes32 Move) public everyoneHasPayed returns (bool) {
         if (msg.sender == Bob && encryptmoveBob == 0x0) {
             encryptmoveBob = Move;
         } else if (msg.sender == Alice && encryptmoveAlice == 0x0) {
@@ -81,8 +107,9 @@ contract RockPaperScissors {
     // Compare move with the saved move
     // Return clear with success, 'Moves.None' otherwise.
     function reveal(string memory clearMove) public commitPhaseEnded returns (Moves) {
-        bytes32 Move = sha256(abi.encodePacked(clearMove));
-        Moves move = Moves(getFirstChar(clearMove)); // Actual move (Rock/Paper/Scissors)
+        bytes32 Move = encryptMove(clearMove, 0);
+        // Moves move = Moves(getFirstChar(clearMove)); // Actual move (Rock/Paper/Scissors)
+        Moves move = getMoveValueByKey(clearMove);
 
         // If move invalid, exit 
         if (move == Moves.None) {
@@ -120,6 +147,13 @@ contract RockPaperScissors {
         }
     }
 
+    modifier everyoneHasPayed() {
+        require(
+            bobPayed && alicePayed
+        );
+        _;
+    }
+
     modifier revealPhaseEnded() {
         require(
             (moveBob != Moves.None && moveAlice != Moves.None)
@@ -144,9 +178,8 @@ contract RockPaperScissors {
 
         address payable addrA = Bob;
         address payable addrB = Alice;
-        uint betBob = initialBet;
         reset(); // Reset game before paying to avoid attacks
-        pay(addrA, addrB, betBob, outcome);
+        pay(addrA, addrB, initialBet, outcome);
 
         return outcome;
     }
@@ -165,7 +198,6 @@ contract RockPaperScissors {
 
     // Reset the game 
     function reset() private {
-        initialBet = 0;
         firstReveal = 0;
         Bob = EMPTY_ADDRESS;
         Alice = EMPTY_ADDRESS;
@@ -173,6 +205,8 @@ contract RockPaperScissors {
         encryptmoveAlice = 0x0;
         moveBob = Moves.None;
         moveAlice = Moves.None;
+        alicePayed = false;
+        bobPayed = false;
     }
 
     function getContractBalance() public view returns (uint) {
@@ -187,4 +221,26 @@ contract RockPaperScissors {
     function bothRevealed() public view returns (bool) {
         return (moveBob != Moves.None && moveAlice != Moves.None);
     }
+
+    function getMoveKeys() public pure returns (string memory, string memory, string memory, string memory) {
+        return ("None", "Rock", "Paper", "Scissors");
+    }
+
+    function getMoveKeyByValue (Moves move) public pure returns (string memory) {
+        if (Moves.None == move) return "None";
+        if (Moves.Rock == move) return "Rock";
+        if (Moves.Paper == move) return "Paper";
+        if (Moves.Scissors == move) return "Scissors";
+        return "";
+    }
+
+    function getMoveValueByKey (string memory moveStr) public pure returns (Moves) {
+        bytes32 moveSha = sha256(abi.encodePacked(moveStr));
+        if (moveSha == sha256(abi.encodePacked("None"))) return Moves.None;
+        if (moveSha == sha256(abi.encodePacked("Rock"))) return Moves.Rock;
+        if (moveSha == sha256(abi.encodePacked("Paper"))) return Moves.Paper;
+        if (moveSha == sha256(abi.encodePacked("Scissors"))) return Moves.Scissors;
+        return Moves.None;
+    }
+
 }

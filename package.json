@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
+    "bignumber": "^1.1.0",
     "elliptic-curve-solidity": "^0.2.4"
   }
 }

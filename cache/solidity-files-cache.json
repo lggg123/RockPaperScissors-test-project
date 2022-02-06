@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/georgelugo/Desktop/web3/RockPaperScissors-test-project/contracts/RockPaperScissors.sol": {
-      "lastModificationDate": 1644097498259,
-      "contentHash": "7fa4eccadd5bbb50e00186fff597c92c",
+      "lastModificationDate": 1644107772257,
+      "contentHash": "4e905eefd1b84aa9c66d1e83dfef8d5f",
       "sourceName": "contracts/RockPaperScissors.sol",
       "solcConfig": {
         "version": "0.8.11",
